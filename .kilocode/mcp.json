@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sqlcl": {
+      "command": "C:\\app\\88417646191\\sqlcl\\bin\\sql",
+      "args": [
+        "-mcp"
+      ],
+      "alwaysAllow": []
+    }
+  }
+}
