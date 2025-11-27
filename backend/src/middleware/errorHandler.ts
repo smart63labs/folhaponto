@@ -5,10 +5,10 @@ import { AppError } from '../types';
 interface ErrorWithCode extends Error {
   statusCode?: number;
   code?: string | number;
-  keyValue?: any;
-  errors?: any;
+  keyValue?: Record<string, unknown>;
+  errors?: Record<string, { message: string }>;
   path?: string;
-  value?: any;
+  value?: unknown;
   errorNum?: number;
   type?: string;
 }
@@ -40,7 +40,7 @@ const errorHandler = (err: ErrorWithCode, req: Request, res: Response, next: Nex
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    const message: string = Object.values(err.errors || {}).map((val: any) => val.message).join(', ');
+    const message: string = Object.values(err.errors || {}).map((val: { message: string }) => val.message).join(', ');
     error = { name: 'ValidationError', message, statusCode: 400 };
   }
 

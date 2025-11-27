@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
 import { JwtPayload, AuthenticatedRequest, User, UserProfile } from '../types';
+import oracledb from 'oracledb';
 
 // Mock user data (será substituído pela integração com Oracle)
 const mockUsers: User[] = [
@@ -210,8 +211,8 @@ const getUserByEmail = async (email: string): Promise<User | null> => {
       return null;
     }
 
-    const user = result.rows[0] as any[];
-    const [id, userEmail, name, profile, department, active] = user;
+    const user = result.rows[0] as Record<string, unknown>;
+    const [id, userEmail, name, profile, department, active] = Object.values(user);
 
     // Get user permissions based on profile
     let permissions: string[] = [];
@@ -258,8 +259,8 @@ const getUserById = async (id: number): Promise<User | null> => {
       return null;
     }
 
-    const user = result.rows[0] as any[];
-    const [userId, email, name, profile, department, active] = user;
+    const user = result.rows[0] as Record<string, unknown>;
+    const [userId, email, name, profile, department, active] = Object.values(user);
 
     // Get user permissions based on profile
     let permissions: string[] = [];

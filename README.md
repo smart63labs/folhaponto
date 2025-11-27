@@ -6,7 +6,7 @@ Sistema moderno e flexível de controle de ponto desenvolvido para a Secretaria 
 
 **Versão Atual:** 2.1  
 **Status:** Fase 1 Concluída (Frontend MVP) | Fase 2 em Planejamento  
-**Última Atualização:** Janeiro 2025
+**Última Atualização:** Novembro 2025
 
 ---
 
@@ -120,6 +120,15 @@ npm run dev
 - ✅ **Navegação por Perfil**: Rotas protegidas por papel
 - ✅ **PWA**: Funcionalidade offline básica
 - ✅ **Design System**: Componentes padronizados SEFAZ-TO
+- ✅ **Cadastro Facial**: Enrolamento de rosto via câmera ou imagem para reconhecimento
+- ✅ **Exportação de Dados**: Templates, agendamentos e múltiplos formatos (CSV, XLSX, JSON, PDF)
+- ✅ **Gestão de Setores**: CRUD, hierarquia de setores e importação em massa
+- ✅ **Configuração de Jornadas**: Definição e ajustes auditáveis de jornadas de trabalho
+- ✅ **Templates de Frequência**: Gestão de modelos de formulários institucionais
+- ✅ **Upload de Frequência (Chefia)**: Envio e processamento de formulários físicos com histórico
+- ✅ **Logs de Auditoria**: Consulta e exportação de atividades por RH/Admin
+- ✅ **Ferramentas Administrativas**: Configurações do sistema, gerenciamento de banco de dados, backup de arquivos e feriados
+- ✅ **Dashboards por Perfil**: Visões específicas para Servidor, Chefia, RH e Admin
 
 #### Testes Realizados:
 - **25+ telas testadas** com Chrome DevTools
@@ -246,5 +255,5 @@ Este projeto é propriedade da Secretaria da Fazenda do Estado do Tocantins (SEF
 
 ---
 
-**Última Atualização:** Janeiro 2025  
+**Última Atualização:** Novembro 2025  
 **Próxima Revisão:** Após definição da arquitetura final da Fase 2

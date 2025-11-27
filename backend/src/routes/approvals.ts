@@ -152,10 +152,10 @@ const getApprovalById = (id: number): Approval | undefined => {
 const canUserApprove = async (approval: Approval, userId: number, userProfile: string, userSectorId?: number): Promise<boolean> => {
   // Check if user is the approver
   if (approval.approverId === userId) return true;
-  
+
   // Check if user has admin or RH permissions
   if (userProfile === 'admin' || userProfile === 'rh') return true;
-  
+
   // Use hierarchy service to check approval permissions
   if (userSectorId && approval.requesterSectorId) {
     try {
@@ -164,10 +164,10 @@ const canUserApprove = async (approval: Approval, userId: number, userProfile: s
       logger.error('Erro ao verificar permissão de aprovação:', error);
     }
   }
-  
+
   // Fallback to original logic
   if (userProfile === 'supervisor' && approval.type !== 'vacation') return true;
-  
+
   return false;
 };
 
@@ -219,7 +219,7 @@ router.post('/', authenticate, createApprovalValidation, async (req: Authenticat
           validationError = `Máximo de ${template.maxHours} horas extras permitidas`;
         }
         break;
-      case 'vacation':
+      case 'vacation': {
         if (!data.startDate || !data.endDate || !data.days) {
           validationError = 'Dados de férias incompletos';
         }
@@ -230,7 +230,8 @@ router.post('/', authenticate, createApprovalValidation, async (req: Authenticat
           validationError = `Férias devem ser solicitadas com ${template.minDaysAdvance} dias de antecedência`;
         }
         break;
-      case 'time_adjustment':
+      }
+      case 'time_adjustment': {
         if (!data.date || !data.originalTime || !data.requestedTime || !data.type) {
           validationError = 'Dados de ajuste de ponto incompletos';
         }
@@ -241,6 +242,7 @@ router.post('/', authenticate, createApprovalValidation, async (req: Authenticat
           validationError = `Ajustes só podem ser solicitados até ${template.maxDaysBack} dias após a data`;
         }
         break;
+      }
     }
 
     if (validationError) {
@@ -255,7 +257,7 @@ router.post('/', authenticate, createApprovalValidation, async (req: Authenticat
     // Determine approver using hierarchy service
     let approverId: number | null = null;
     let approverName: string | null = null;
-    
+
     if (req.user.profile === 'servidor' && req.user.sectorId) {
       try {
         const possibleApprovers = await approvalHierarchyService.getPossibleApprovers(req.user.sectorId);
@@ -340,7 +342,7 @@ router.get('/', authenticate, async (req: AuthenticatedRequest, res: Response): 
       // Supervisors can see requests they need to approve or from their sector hierarchy
       filteredApprovals = filteredApprovals.filter(async approval => {
         if (approval.approverId === userId) return true;
-        
+
         // Check if user can approve based on sector hierarchy
         if (req.user.sectorId && approval.requesterSectorId) {
           try {
@@ -351,15 +353,15 @@ router.get('/', authenticate, async (req: AuthenticatedRequest, res: Response): 
             return approval.requesterDepartment === req.user.department;
           }
         }
-        
+
         return approval.requesterDepartment === req.user.department;
       });
-      
+
       // Since we're using async filter, we need to resolve all promises
       const filterResults = await Promise.all(
         [...mockApprovals].map(async approval => {
           if (approval.approverId === userId) return true;
-          
+
           if (req.user.sectorId && approval.requesterSectorId) {
             try {
               return await approvalHierarchyService.canApproveRequest(userId, approval.requesterSectorId);
@@ -368,11 +370,11 @@ router.get('/', authenticate, async (req: AuthenticatedRequest, res: Response): 
               return approval.requesterDepartment === req.user.department;
             }
           }
-          
+
           return approval.requesterDepartment === req.user.department;
         })
       );
-      
+
       filteredApprovals = mockApprovals.filter((_, index) => filterResults[index]);
     }
     // Admin and RH can see all approvals
@@ -461,10 +463,10 @@ router.get('/:id', authenticate, param('id').isInt().withMessage('ID inválido')
     }
 
     // Check if user can view this approval
-    const canView: boolean = userProfile === 'admin' || 
-                   approval.requesterId === userId || 
-                   approval.approverId === userId ||
-                   (userProfile === 'rh' && ['vacation', 'leave'].includes(approval.type));
+    const canView: boolean = userProfile === 'admin' ||
+      approval.requesterId === userId ||
+      approval.approverId === userId ||
+      (userProfile === 'rh' && ['vacation', 'leave'].includes(approval.type));
 
     if (!canView) {
       res.status(403).json({
@@ -493,7 +495,7 @@ router.get('/:id', authenticate, param('id').isInt().withMessage('ID inválido')
 // @route   PUT /api/approvals/:id/action
 // @desc    Approve, reject or request changes
 // @access  Private (Approvers only)
-router.put('/:id/action', authenticate, 
+router.put('/:id/action', authenticate,
   param('id').isInt().withMessage('ID inválido'),
   approvalActionValidation,
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -547,8 +549,8 @@ router.put('/:id/action', authenticate,
       }
 
       // Update approval
-      approval.status = action === 'approve' ? 'approved' : 
-                       action === 'reject' ? 'rejected' : 'changes_requested';
+      approval.status = action === 'approve' ? 'approved' :
+        action === 'reject' ? 'rejected' : 'changes_requested';
       approval.updatedAt = new Date().toISOString();
       approval.comments = comments || '';
       approval.processedBy = userId;
@@ -697,14 +699,14 @@ router.get('/dashboard', authenticate, authorize('approvals.read'), async (req: 
 
     // Filter approvals based on user role
     let relevantApprovals: Approval[] = [...mockApprovals];
-    
+
     if (userProfile === 'supervisor') {
-      relevantApprovals = relevantApprovals.filter(approval => 
-        approval.approverId === userId || 
+      relevantApprovals = relevantApprovals.filter(approval =>
+        approval.approverId === userId ||
         approval.requesterDepartment === req.user.department
       );
     } else if (userProfile === 'rh') {
-      relevantApprovals = relevantApprovals.filter(approval => 
+      relevantApprovals = relevantApprovals.filter(approval =>
         ['vacation', 'leave'].includes(approval.type) || approval.approverId === userId
       );
     }
@@ -716,7 +718,7 @@ router.get('/dashboard', authenticate, authorize('approvals.read'), async (req: 
       pending: relevantApprovals.filter(a => a.status === 'pending').length,
       approved: relevantApprovals.filter(a => a.status === 'approved').length,
       rejected: relevantApprovals.filter(a => a.status === 'rejected').length,
-      overdue: relevantApprovals.filter(a => 
+      overdue: relevantApprovals.filter(a =>
         a.status === 'pending' && new Date(a.deadline) < new Date()
       ).length,
       byType: {
@@ -736,7 +738,7 @@ router.get('/dashboard', authenticate, authorize('approvals.read'), async (req: 
     // Recent activity (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
+
     const recentActivity: Approval[] = relevantApprovals
       .filter(a => new Date(a.updatedAt) >= sevenDaysAgo)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())

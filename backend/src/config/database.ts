@@ -35,12 +35,12 @@ class Database {
 
       // Criar pool de conexões
       this.pool = await oracledb.createPool(dbConfig);
-      
+
       logger.info('Pool de conexões Oracle criado com sucesso');
-      
+
       // Testar conexão
       await this.testConnection();
-      
+
     } catch (error) {
       logger.error('Erro ao inicializar banco de dados Oracle:', error);
       throw error;
@@ -49,7 +49,7 @@ class Database {
 
   async testConnection(): Promise<void> {
     let connection: oracledb.Connection | undefined;
-    
+
     try {
       connection = await this.getConnection();
       const result = await connection.execute('SELECT 1 FROM DUAL');
@@ -68,7 +68,7 @@ class Database {
     if (!this.pool) {
       throw new Error('Pool de conexões não inicializado');
     }
-    
+
     return await this.pool.getConnection();
   }
 
@@ -80,13 +80,13 @@ class Database {
     }
   }
 
-  async executeQuery(sql: string, binds: any[] = []): Promise<oracledb.Result<any>> {
+  async executeQuery<T = unknown>(sql: string, binds: oracledb.BindParameters = []): Promise<oracledb.Result<T>> {
     let connection: oracledb.Connection | undefined;
-    
+
     try {
       connection = await this.getConnection();
       const result = await connection.execute(sql, binds);
-      return result;
+      return result as oracledb.Result<T>;
     } catch (error) {
       logger.error('Erro ao executar query:', { sql, error });
       throw error;
@@ -97,26 +97,26 @@ class Database {
     }
   }
 
-  async executeTransaction(queries: Array<{ sql: string; binds?: any[] }>): Promise<any[]> {
+  async executeTransaction(queries: Array<{ sql: string; binds?: oracledb.BindParameters }>): Promise<oracledb.Result<unknown>[]> {
     let connection: oracledb.Connection | undefined;
-    
+
     try {
       connection = await this.getConnection();
-      
+
       // Desabilitar autoCommit para transação
       const originalAutoCommit = oracledb.autoCommit;
       oracledb.autoCommit = false;
-      
-      const results: any[] = [];
-      
+
+      const results: oracledb.Result<unknown>[] = [];
+
       for (const query of queries) {
         const result = await connection.execute(query.sql, query.binds || []);
         results.push(result);
       }
-      
+
       await connection.commit();
       return results;
-      
+
     } catch (error) {
       if (connection) {
         await connection.rollback();

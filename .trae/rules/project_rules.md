@@ -1,1 +1,0 @@
-- Use sql plus para ver o bando de dados :  FOLHAPONTO_PDB, no schema : folhaponto_user na tabela setores. As credenciais são estas :  folhaponto_user/folhaponto123@localhost:1521/FOLHAPONTO_PDB. Ao criar scrips .SQL para essa tarefa, crie dentro de uma pasta /ScriptsSQL dentro da pasta /Docs. não use o mcp
